@@ -1,6 +1,5 @@
 /*
   *Drumpad
-  *ncurses implementation of a drum machine and MIDI sequencer using fluidsynth
   *(2018), Kyle Frownfelter <ksf@fastmail.fm>
   *Released under the terms of the GNU General Public License*/
 
@@ -70,37 +69,37 @@ int key_hash(int keycode) ;
 
 int main (int argc, char **argv) {
   int program=0;
-float gain=1.0;
+  float gain=1.0;
   initscr();
   noecho();
   keypad(stdscr,true);
   raw();
-   if (argc==1) {printw("Usage: %s <sound font>", argv[0]);refresh();endwin();return 1;}
+  if (argc==1) {printw("Usage: %s <sound font>", argv[0]);refresh();endwin();return 1;}
   int velocity=100;
   fluid_settings_t *settings=new_fluid_settings();
-		fluid_synth_t *synth;
+  fluid_synth_t *synth;
   fluid_audio_driver_t *driver;
-		fluid_settings_setstr(settings,"audio.driver","alsa");
+  fluid_settings_setstr(settings,"audio.driver","alsa");
   fluid_settings_setnum(settings,"synth.gain",gain);
-		synth=new_fluid_synth(settings);
+  synth=new_fluid_synth(settings);
   driver = new_fluid_audio_driver(settings,synth);
   fluid_synth_sfload(synth,argv[1],1);
   while (1){
     int ch=getch();
     if (ch==KEY_LEFT) { if (gain==0.0) continue; else { gain-=0.5;  
-fluid_settings_setnum(settings,"synth.gain",gain);printw("Gain set to %f.\n",gain);refresh();continue;}}
+      fluid_settings_setnum(settings,"synth.gain",gain);printw("Gain set to %f.\n",gain);refresh();continue;}}
     else if (ch==KEY_RIGHT) { if (gain==10.0) continue; else { gain+=0.5;  
-fluid_settings_setnum(settings,"synth.gain",gain);printw("Gain set to %f.\n",gain);refresh();continue;}}
+      fluid_settings_setnum(settings,"synth.gain",gain);printw("Gain set to %f.\n",gain);refresh();continue;}}
     else if (ch==KEY_BACKSPACE) break;
     else if (ch==KEY_DOWN) { if (program==128) continue;else { 
-program+=1;fluid_synth_program_change(synth,0,program);printw("Changed to program %d.\n",program);refresh();continue;}}
+      program+=1;fluid_synth_program_change(synth,0,program);printw("Changed to program %d.\n",program);refresh();continue;}}
     else if (ch==KEY_UP) { if (program==0) continue; else { 
-program-=1;fluid_synth_program_change(synth,0,program);printw("Program changed to %d.\n",program);refresh();continue;}}
+      program-=1;fluid_synth_program_change(synth,0,program);printw("Program changed to %d.\n",program);refresh();continue;}}
     else if (ch==32) {   fluid_settings_setnum(settings,"synth.gain",0.0);usleep(100000);   
-fluid_settings_setnum(settings,"synth.gain",gain);printw("Silenced.");refresh();continue;}
+      fluid_settings_setnum(settings,"synth.gain",gain);printw("Silenced.");refresh();continue;}
     int hash=key_hash(ch);
     if (hash==-1) continue; else fluid_synth_noteon(synth,0,key_table[hash].note,velocity);
-    }
+  }
   delete_fluid_audio_driver(driver);
   delete_fluid_synth(synth);
   delete_fluid_settings(settings);
